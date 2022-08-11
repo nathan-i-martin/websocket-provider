@@ -1,2 +1,3 @@
+# Webhook Provider
 
-# Typescript module
+A basic template that can be used to create webhook instances
