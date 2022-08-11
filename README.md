@@ -4,7 +4,7 @@ This WebSocket provider gives a simple and easy way to setup a websocket server 
 
 Creating a new WebSocket instance is as easy as calling `new WebsocketProvider(port)` you can then set parameters and event listeners.
 ```javascript
-const init = () => {
+const init = async () => {
     const socket = new WebsocketProvider(8080);
 
     socket.on("message",(message: string) => {
