@@ -5,6 +5,7 @@ export class Heart {
     #_isAlive: boolean = false;
     #_rate: number;
     #_timer?: NodeJS.Timer;
+    #_onDeath: Function = () => {};
 
     constructor(rate: number) {
         this.#_rate = oneSecond * (rate ?? defaultHeartbeatRate);
@@ -30,6 +31,8 @@ export class Heart {
         clearInterval(this.#_timer);
         this.#_isAlive = false;
         this.#_timer = undefined;
+        
+        this.#_onDeath();
     }
 
     /**
@@ -41,4 +44,12 @@ export class Heart {
      * Sets the heart to keep beating if it was meant to die on the next beat
      */
     keepBeating = (): void => { this.#_isAlive = true; }
+
+    on = (eventName: string, callback: Function): void => {
+        switch(eventName) {
+            case "death":
+                this.#_onDeath = callback;
+                break;
+        }
+    }
 }

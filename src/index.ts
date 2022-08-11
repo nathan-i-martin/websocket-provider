@@ -1,19 +1,39 @@
 "use strict";
 import { WebsocketProvider } from "./providers/WebsocketProvider";
 
-export const init = () => {
-    const testSocket = new WebsocketProvider(8080);
+const websockets: WebsocketProvider[] = [];
 
-    console.log("Starting message listener...");
-    testSocket.onMessage((message: string) => {
+const chatProvider = (): WebsocketProvider => {
+    const socket = new WebsocketProvider(8080);
+
+    socket.on("message",(message: string) => {
         console.log(message);
-        testSocket.send("message received");
+        socket.send("Message received. Chat Provider 1");
     });
-    console.log("connecting...");
-    testSocket.connect();
 
-    testSocket.send("test message");
-    console.log("sending the test message");
+    socket.connect();
+
+    return socket;
+}
+
+const secondChatProvider = (): WebsocketProvider => {
+    const socket = new WebsocketProvider(8081);
+
+    socket.shouldReconnect(true);
+
+    socket.on("message",(message: string) => {
+        console.log(message);
+        socket.send("Message received. Chat Provider 2");
+    });
+
+    socket.connect();
+
+    return socket;
+}
+
+export const init = () => {
+    websockets.push(chatProvider());
+    websockets.push(secondChatProvider());
 }
 
 init();

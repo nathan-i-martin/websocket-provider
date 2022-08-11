@@ -7,53 +7,60 @@ type onCloseCallback = () => void;
 type onErrorCallback = (event: ErrorEvent) => void;
 
 export class WebsocketProvider {
+    #_reconnect: boolean = false;
     #_heart: Heart;
     #_socket;
     #_port: number = 8080;
     #_connection: any = null;
-    #_onConnectCallback:  onConnectCallback = () => {};
-    #_onMessageCallback:  onMessageCallback = () => {};
-    #_onCloseCallback:    onCloseCallback   = () => {};
-    #_onErrorCallback:    onErrorCallback   = () => {};
+    #_onConnectCallback: onConnectCallback = () => {};
+    #_onMessageCallback: onMessageCallback = () => {};
+    #_onCloseCallback:   onCloseCallback   = () => {};
+    #_onErrorCallback:   onErrorCallback   = () => {};
 
-    constructor(port: number, timeout?: number) {
+    constructor(port: number, timeout?: number, reconnect?: boolean) {
         this.#_port = port;
         this.#_socket = new WebSocket.Server({ port });
 
         this.#_heart = new Heart(timeout ?? 30);
 
+        this.#_reconnect = reconnect ?? false;
+
         console.log(`Defining a new websocket on port ${this.#_port}`);
     }
 
-    /**
-     * Set the callback to fire when the WebSocket first connects
-     * @param callback The callback to fire when the WebSocket connection opens
-     */
-    onConnect = (callback: onConnectCallback): void => { this.#_onConnectCallback = callback };
+    on = (eventName: string, callback: Function): void => {
+        if(eventName == "connect") this.#_onConnect(callback as onConnectCallback);
+        if(eventName == "message") this.#_onMessage(callback as onMessageCallback);
+        if(eventName == "close")     this.#_onClose(callback as onCloseCallback);
+        if(eventName == "error")     this.#_onError(callback as onErrorCallback);
+    }
 
     /**
-     * Set the callback to fire when the WebSocket receives a message
-     * @param callback The callback to fire when the WebSocket receives a message
+     * Set the callback to fire when the WebSocket first connects.
+     * @param callback The callback to fire when the WebSocket connection opens.
      */
-    onMessage = (callback: onMessageCallback): void => {this.#_onMessageCallback = callback};
+    #_onConnect = (callback: onConnectCallback): void => { this.#_onConnectCallback = callback };
 
     /**
-     * Set the callback to fire when the WebSocket connection closes
-     * @param callback The callback to fire when the WebSocket connection closes
+     * Set the callback to fire when the WebSocket receives a message.
+     * @param callback The callback to fire when the WebSocket receives a message.
      */
-    onClose = (callback: onCloseCallback): void => {
-        this.#_heart.kill();
-        this.#_onCloseCallback = callback
-    };
+    #_onMessage = (callback: onMessageCallback): void => {this.#_onMessageCallback = callback};
 
     /**
-     * Set the callback to fire when the WebSocket connection encounters an error
-     * @param callback The callback to fire when the WebSocket encounters an error
+     * Set the callback to fire when the WebSocket connection closes.
+     * @param callback The callback to fire when the WebSocket connection closes.
      */
-    onError = (callback: onErrorCallback): void => {this.#_onErrorCallback = callback};
+    #_onClose = (callback: onCloseCallback): void => { this.#_onCloseCallback = callback; };
 
     /**
-     * Open the WebSocket connection
+     * Set the callback to fire when the WebSocket connection encounters an error.
+     * @param callback The callback to fire when the WebSocket encounters an error.
+     */
+    #_onError = (callback: onErrorCallback): void => {this.#_onErrorCallback = callback};
+
+    /**
+     * Open the WebSocket connection.
      */
     connect = (): void => {
         const connectionHandler = (connection: WebSocket) => {
@@ -62,30 +69,67 @@ export class WebsocketProvider {
             this.#_connection = connection;
             this.#_onConnectCallback(connection);
 
+            /**
+             * If the heart dies, terminate the connection.
+             */
+            this.#_heart.on("death",() => {
+                this.#_socket.close();
+            });
+            /**
+             * Start the heart.
+             */
             this.#_heart.start(() => {
                 this.#_heart.killLater();
                 this.#_connection.ping();
             });
 
             /**
-             * When the connection is pinged, re-confirm the heartbeat
+             * When the connection is pinged, re-confirm the heartbeat.
              */
             this.#_connection.on('pong', this.#_heart.keepBeating());
             
-            connection.on("message", (message: string) => this.#_onMessageCallback(message));
+            /**
+             * When message is received call the specified callback.
+             */
+             this.#_connection.on("message", (message: string) => this.#_onMessageCallback(message));
             
-            connection.on("close", this.#_onCloseCallback);
+            /**
+             * When connection dies, kill the heart and call the specified callback.
+             */
+             this.#_connection.on("close", () => {
+                this.#_heart.kill();
+                this.#_onCloseCallback;
+
+                // TODO: Attempt to reconnect (might cause issues, needs to be tested)
+                if(this.#_reconnect) this.connect();
+            });
             
-            connection.on("error", this.#_onErrorCallback);
+            /**
+             * When there's an error on the connection, call the specified callback.
+             */
+            this.#_connection.on("error", this.#_onErrorCallback);
+
+            console.log(`Started websocket server on port ${this.#_port}`);
         }
 
         this.#_socket.on("connection", (connection: WebSocket) => connectionHandler(connection));
     }
 
     /**
-     * Send a message over the connection
-     * @param message The message to be sent
-     * @throws An error if you try to send a message when the connection is closed
+     * Sets whether or not the WebSocket should attempt to reconnect if it get's disconnected.
+     * @param shouldReconnect Should the WebSocket attempt to reconnect if it disconnects.
+     * @throws An error if you try to set this while the WebSocket is already connected.
+     */
+    shouldReconnect = (shouldReconnect: boolean): void => {
+        if(this.#_connection) throw new Error("You must set a WebSocket's reconnection status before connecting it!");
+
+        this.#_reconnect = shouldReconnect;
+    }
+
+    /**
+     * Send a message over the connection.
+     * @param message The message to be sent.
+     * @throws An error if you try to send a message when the connection is closed.
      */
     send = (message: string): void => {
         if(!this.#_connection) throw new Error("Tried to send a message over a WebSocket connection that wasn't open!");
@@ -94,13 +138,34 @@ export class WebsocketProvider {
     }
 
     /**
-     * Ping the connection
-     * @returns `true` if the connection is open. `false` if the connection is closed
-     * @throws An error if you try to ping the connection while it's closed
+     * Ping the connection.
+     * @returns `true` if the connection is open. `false` if the connection is closed.
+     * @throws An error if you try to ping the connection while it's closed.
      */
     ping = (): void => {
         if(!this.#_connection) throw new Error("Tried to send a message over a WebSocket connection that wasn't open!");
 
         this.#_connection.ping();
+    }
+
+    /**
+     * Closes the connection.
+     * If you have `.shouldReconnect()` set to `true` this connection will reopen immediately after closing. If you want to permanently close the connection, use .`kill()` instead.
+     */
+    close = (): void => {
+        if(!this.#_connection) return;
+
+        this.#_connection.close();
+    }
+
+    /**
+     * Kill the connection.
+     * The only difference between this and `.close()` is that if `.shouldReconnect()` is set to `true` this will force it to close until it is reopened with `.connect()`.
+     */
+    kill = (): void => {
+        if(!this.#_connection) return;
+
+        this.#_reconnect = false;
+        this.#_connection.close();
     }
 }
