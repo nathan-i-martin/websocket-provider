@@ -1,0 +1,41 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"lib": [
+			"ES2016"
+		],
+
+		"rootDir": "lib",
+		"outDir": "dist",
+
+		"strict": true,
+		"alwaysStrict": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"downlevelIteration": true,
+		"declaration": true,
+
+		"pretty": true,
+		
+		"noEmitOnError": true,
+		"removeComments": false,
+		"sourceMap": true,
+	},
+	"include": [
+		"lib/**/*"
+	],
+}
