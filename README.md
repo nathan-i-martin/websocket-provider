@@ -4,14 +4,18 @@ This WebSocket provider gives a simple and easy way to setup a websocket server 
 
 Creating a new WebSocket instance is as easy as calling `new WebsocketProvider(port)` you can then set parameters and event listeners.
 ```javascript
-const socket = new WebsocketProvider(8080);
+const init = () => {
+    const socket = new WebsocketProvider(8080);
 
-socket.on("message",(message: string) => {
-    console.log(message);
-    socket.send("Message received. Chat Provider 1");
-});
+    socket.on("message",(message: string) => {
+        console.log(message);
+    });
 
-socket.connect();
+    if(await socket.connect()) return console.error('Unable to start the connection!');
+
+    socket.send('hello world');
+}
+init();
 ```
 ---
 ## Event Listeners
@@ -58,6 +62,6 @@ Sets whether or not the WebSocket should attempt to reconnect if it get's discon
 Ping the connection.
 - *throws* - An error if you try to ping the connection while it's closed.
 ### `.close()`
-Close the connection. If you have `.shouldReconnect()` set to `true` this connection will reopen immediately after closing. If you want to permanently close the connection, use .`kill()` instead.
+Close the connection. If you have `.shouldReconnect()` set to `true` this connection will reopen immediately after closing. If you want to permanently close the connection, use `.kill()` instead.
 ### `.kill()`
 Kill the connection. The only difference between this and `.close()` is that if `.shouldReconnect()` is set to `true` this will force it to close until it is reopened with `.connect()`.
