@@ -28,11 +28,21 @@ export class WebsocketProvider {
         console.log(`Defining a new websocket on port ${this.#_port}`);
     }
 
+    /**
+     * Listen for an event.
+     * @param eventName The name of the event to listen for.
+     * @param callback The callback to fire once an event is thrown.
+     * @throws An error if you attempt to assign a new event listener while the websocket is connected.
+     */
     on = (eventName: string, callback: Function): void => {
+        if(!this.#_connection) throw new Error("Tried to assign a new event listener while the connection is active!");
+
         if(eventName == "connect") this.#_onConnect(callback as onConnectCallback);
         if(eventName == "message") this.#_onMessage(callback as onMessageCallback);
         if(eventName == "close")     this.#_onClose(callback as onCloseCallback);
         if(eventName == "error")     this.#_onError(callback as onErrorCallback);
+
+        console.warn(`WebsocketProvider was asked to listen for event: ${eventName}. But no such event exists!`);
     }
 
     /**
@@ -139,7 +149,6 @@ export class WebsocketProvider {
 
     /**
      * Ping the connection.
-     * @returns `true` if the connection is open. `false` if the connection is closed.
      * @throws An error if you try to ping the connection while it's closed.
      */
     ping = (): void => {
@@ -149,7 +158,7 @@ export class WebsocketProvider {
     }
 
     /**
-     * Closes the connection.
+     * Close the connection.
      * If you have `.shouldReconnect()` set to `true` this connection will reopen immediately after closing. If you want to permanently close the connection, use .`kill()` instead.
      */
     close = (): void => {
