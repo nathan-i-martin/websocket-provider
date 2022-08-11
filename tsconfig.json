@@ -7,7 +7,7 @@
 			"ES2016"
 		],
 
-		"rootDir": "lib",
+		"rootDir": "src",
 		"outDir": "dist",
 
 		"strict": true,
@@ -36,6 +36,6 @@
 		"sourceMap": true,
 	},
 	"include": [
-		"lib/**/*"
-	],
+		"src/**/*"
+	]
 }
