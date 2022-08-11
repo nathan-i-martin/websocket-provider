@@ -11,7 +11,7 @@ const init = async () => {
         console.log(message);
     });
 
-    if(await socket.connect()) return console.error('Unable to start the connection!');
+    if(!(await socket.connect())) return console.error('Unable to start the connection!');
 
     socket.send('hello world');
 }
