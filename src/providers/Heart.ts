@@ -19,7 +19,6 @@ export class Heart {
 
         this.#_timer = setInterval(() => {
             if(this.#_isAlive === false) this.kill();
-
             callback();
         }, this.#_rate);
     }

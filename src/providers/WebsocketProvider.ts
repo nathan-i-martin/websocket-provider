@@ -16,7 +16,6 @@ export class WebsocketProvider {
     #_onCloseCallback:    onCloseCallback   = () => {};
     #_onErrorCallback:    onErrorCallback   = () => {};
 
-
     constructor(port: number, timeout?: number) {
         this.#_port = port;
         this.#_socket = new WebSocket.Server({ port });
