@@ -1,6 +1,6 @@
 # WebSocket Provider
 
-This WebSocket provider gives a simple and easy way to setup a websocket server and/or client using Javascript!
+This WebSocket provider gives a simple and easy way to setup a websocket server using Javascript!
 
 Creating a new WebSocket server instance is as easy as calling `new WebsocketProvider(port)` you can then set parameters and event listeners.
 ```javascript
@@ -92,7 +92,7 @@ init();
 ```
 ---
 ## Event Listeners
-There are five events that you can listen for; `connect`, `message`, `close`, and `error`.
+There are five events that you can listen for; `connect`, `message`, `close`, `error`, and `close`.
 > **NOTE:** Event listeners must be defined before you start the WebSocket connection
 
 ### `connect`
@@ -142,7 +142,6 @@ Ping the connection.
 Close the connection.
 ### `.kill()`
 Kill the connection. The only difference between this and `.close()` is that this will not allow the connection to be restarted; even if `.reconnect()` has been set.
-
 ### `.reconnect()`
 Set this Websocket to attempt to reconnect after a delay (in seconds). Default's to disabled
-
+- *param* `delay` - Default `null` - The amount of time to wait (in seconds) before attempting to reconnect. If set to `null`, the connection will not attempt to reconnect on close.
