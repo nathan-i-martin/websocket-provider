@@ -74,16 +74,11 @@ const init = async (): void => {
                     .setPort(8080)
                     .build();
 
-    const socket = new WebsocketSubscriber(uri, 4);
+    const socket = new WebsocketSubscriber(uri);
     socket.reconnect(2);
 
     socket.on("message",(message: string) => {
         console.log(message);
-    });
-    socket.on("close",() => {
-        console.log("Connection closed...");
-    });
-    socket.on("connect",() => {
     });
     
     if(!(await socket.connect())) throw new Error('Unable to start the connection!');
