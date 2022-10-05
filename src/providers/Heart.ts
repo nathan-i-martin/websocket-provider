@@ -2,7 +2,7 @@ const defaultHeartbeatRate = 30; // The default number of seconds to set the hea
 const oneSecond = 1000; // 1 second is equal to 1000ms
 
 export class Heart {
-    #_isAlive: boolean = false;
+    #_isAlive: boolean = true;
     #_rate: number;
     #_timer?: NodeJS.Timer;
     #_onDeath: Function = () => {};
@@ -16,7 +16,8 @@ export class Heart {
      * @throws An error if you try to start the heart while it's already beating
      */
     start = (callback: Function): void => {
-        if(this.#_timer == undefined) throw new Error("This heart has already started beating! You must kill it before you can start it again!");
+        this.#_isAlive = true;
+        if(this.#_timer != undefined) throw new Error("This heart has already started beating! You must kill it before you can start it again!");
 
         this.#_timer = setInterval(() => {
             if(this.#_isAlive === false) this.kill();
