@@ -44,25 +44,25 @@ export class WebsocketProvider implements WebSocketHandler {
      * Set the callback to fire when the WebSocket first connects.
      * @param callback The callback to fire when the WebSocket connection opens.
      */
-    #_onConnect = (callback: OnConnectCallback): void => { this.#_onConnectCallback = callback };
+    #_onConnect = (callback: OnConnectCallback): void => this.#_onConnectCallback = callback;
 
     /**
      * Set the callback to fire when the WebSocket receives a message.
      * @param callback The callback to fire when the WebSocket receives a message.
      */
-    #_onMessage = (callback: OnMessageCallback): void => {this.#_onMessageCallback = callback};
+    #_onMessage = (callback: OnMessageCallback): void => this.#_onMessageCallback = callback;
 
     /**
      * Set the callback to fire when the WebSocket connection closes.
      * @param callback The callback to fire when the WebSocket connection closes.
      */
-    #_onClose = (callback: OnCloseCallback): void => { this.#_onCloseCallback = callback; };
+    #_onClose = (callback: OnCloseCallback): void => this.#_onCloseCallback = callback;
 
     /**
      * Set the callback to fire when the WebSocket connection encounters an error.
      * @param callback The callback to fire when the WebSocket encounters an error.
      */
-    #_onError = (callback: OnErrorCallback): void => {this.#_onErrorCallback = callback};
+    #_onError = (callback: OnErrorCallback): void => this.#_onErrorCallback = callback;
 
     /**
      * Open the WebSocket for connections to be made.
