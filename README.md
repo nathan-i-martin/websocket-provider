@@ -1,6 +1,9 @@
-# WebSocket Provider
+# Websocket Provider
+This code is intended to be a basic abstraction of the base websocket API which you can then build your websocket around.
+This code is written with the intent that it be taken and changed as needed to fit the needs of your individual projects. Hence why it does not have an `npm` repository set up.
 
-This WebSocket provider gives a simple and easy way to setup a websocket server using Javascript!
+
+# WebSocket Server
 
 Creating a new WebSocket server instance is as easy as calling `new WebsocketProvider(port)` you can then set parameters and event listeners.
 ```javascript
